@@ -16,21 +16,23 @@ export class Login {
   loginForm!: FormGroup;
   loading = false;
   submitted = false;
+  showPassword = false;
+  loginError = '';
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private authService: AuthService,
-    private toastr: ToastrService
-  ) {
+  constructor(private formBuilder: FormBuilder, private router: Router, private authService: AuthService, private toastr: ToastrService) {
     this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required]
+      username: ['', [Validators.required, Validators.minLength(4)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [false]
     });
+
+    // Cargamos credenciales guardadas
+    this.loadSavedCredentials();
   }
 
   onSubmit(): void {
     this.submitted = true;
+    this.loginError = '';
     
     if (this.loginForm.invalid) {
       return;
@@ -48,5 +50,32 @@ export class Login {
         this.loading = false;
       }
     });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+  /**
+      forgotPassword(event: Event){
+        event.preventDefault();
+        console.log('Recuperar contraseña');
+      }  
+  */
+
+  private loadSavedCredentials() {
+    const savedCredentials = localStorage.getItem('savedCredentials');
+    if(savedCredentials) {
+      const { username, password } = JSON.parse(savedCredentials);
+      this.loginForm.patchValue({ username, password, rememberMe: true });
+    }
+  }
+
+  private saveCredentials() {
+    if(this.loginForm.get('rememberMe')?.value){
+      const { username, password } = this.loginForm.value;
+      localStorage.setItem('savedCredentials', JSON.stringify({ username, password }));
+    } else {
+      localStorage.removeItem('savedCredentials');
+    }
   }
 }

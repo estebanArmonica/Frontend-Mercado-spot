@@ -1,0 +1,113 @@
+<!-- etl-process.component.html -->
+<div class="etl-container">
+    <div class="etl-header">
+        <h2>Procesador ETL</h2>
+        <p>Pipeline de extracción, transformación y carga de datos</p>
+    </div>
+
+    <div class="etl-content">
+        <!-- Panel de control izquierdo -->
+        <div class="control-panel">
+            <div class="upload-section">
+                <h3>1. Seleccionar Archivo</h3>
+                <div class="upload-area" 
+                     (click)="fileInput.click()"
+                     [class.dragover]="dragOver"
+                     (dragover)="$event.preventDefault(); dragOver = true"
+                     (dragleave)="dragOver = false"
+                     (drop)="onFileDrop($event)">
+                    <input type="file" #fileInput (change)="onFileSelected($event)" 
+                           accept=".xlsx,.xls,.csv" hidden>
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h4>{{ selectedFile ? selectedFile.name : 'Arrastra o selecciona un archivo' }}</h4>
+                    <p>Formatos soportados: Excel (.xlsx, .xls) o CSV</p>
+                    <small>Tamaño máximo: 10MB</small>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" 
+                            (click)="startETLProcess()" 
+                            [disabled]="!selectedFile || isProcessing">
+                        <i class="fas fa-play"></i> Iniciar ETL
+                    </button>
+                    <button class="btn-danger" 
+                            *ngIf="isProcessing" 
+                            (click)="cancelProcess()">
+                        <i class="fas fa-stop"></i> Cancelar
+                    </button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-section" *ngIf="isProcessing">
+                    <div class="progress-info">
+                        <span>Progreso general</span>
+                        <span>{{ uploadProgress }}%</span>
+                    </div>
+                    <div class="progress-bar-modern">
+                        <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+                    </div>
+                    <div class="step-info" *ngIf="etlProgress">
+                        <i class="fas fa-cog fa-spin"></i>
+                        <span>Paso actual: {{ etlProgress.currentStep }}</span>
+                    </div>
+                </div>
+
+                <!-- Stats Summary -->
+                <div class="stats-summary" *ngIf="etlProgress && !isProcessing">
+                    <h3>Resumen del Proceso</h3>
+                    <div class="stat-item">
+                        <span>Registros extraídos:</span>
+                        <strong>{{ etlProgress.recordsExtracted | number }}</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Registros transformados:</span>
+                        <strong>{{ etlProgress.recordsTransformed | number }}</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Registros cargados:</span>
+                        <strong>{{ etlProgress.recordsLoaded | number }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Logs (Consola) -->
+        <div class="logs-panel">
+            <div class="logs-header">
+                <h3>
+                    <i class="fas fa-terminal"></i> 
+                    Consola de Ejecución
+                </h3>
+                <div class="logs-actions">
+                    <button class="icon-btn" (click)="autoScroll = !autoScroll" 
+                            [class.active]="autoScroll" title="Auto-scroll">
+                        <i class="fas" [class.fa-arrow-down]="autoScroll" [class.fa-pause]="!autoScroll"></i>
+                    </button>
+                    <button class="icon-btn" (click)="clearLogs()" title="Limpiar consola">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <button class="icon-btn" (click)="downloadLogs()" title="Exportar logs">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="log-container" #logContainer>
+                <div *ngFor="let log of logs" class="log-entry" [class]="getLogClass(log.type)">
+                    <div class="log-icon">
+                        <i [class]="getLogIcon(log.type)"></i>
+                    </div>
+                    <div class="log-content">
+                        <span class="log-time">{{ log.timestamp }}</span>
+                        <span class="log-message" [innerHTML]="log.message"></span>
+                    </div>
+                </div>
+                
+                <div class="log-placeholder" *ngIf="logs.length === 0">
+                    <i class="fas fa-terminal"></i>
+                    <p>Esperando inicio del proceso ETL...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

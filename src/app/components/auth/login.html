@@ -1,29 +1,82 @@
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-center">Login ETL Mercado Spot</h3>
+<div class="desktop-login-container">
+    <div class="login-window">
+        <!-- Contenido principal -->
+        <div class="login-content">
+            <!-- Sidebar izquierdo - Info de la app -->
+            <div class="info-sidebar">
+                <div class="app-info">
+                    <img src="assets/images/auth/logo_safira_energia.png" alt="Logo" class="app-logo">
+                    <h2>Safira Energia</h2>
+                    <p class="app-version">v1.0.0</p>
                 </div>
-                <div class="card-body">
-                    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-                        <div class="mb-3">
-                            <label class="form-label">Usuario</label>
-                            <input type="text" class="form-control" formControlName="username">
-                            <div class="text-danger" *ngIf="submitted && loginForm.get('username')?.errors?.['required']">
-                                Usuario es requerido
-                            </div>
+            </div>
+
+            <!-- Formulario de login -->
+            <div class="form-sidebar">
+                <div class="form-wrapper">
+                    <h3>Acceso al Sistema</h3>
+                    <p class="subtitle">Ingrese sus credenciales para continuar</p>
+
+                    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+                        <div class="form-field">
+                            <label>
+                                <i class="fas fa-envelope"></i>
+                                Correo electrónico
+                            </label>
+                            <input type="text" 
+                                   formControlName="username"
+                                   placeholder="tu usuario"
+                                   autocomplete="off"
+                                   [class.error]="submitted && loginForm.get('username')?.invalid">
+                            <span class="field-message error" *ngIf="submitted && loginForm.get('username')?.errors?.['required']">
+                                Campo requerido
+                            </span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" formControlName="password">
-                            <div class="text-danger" *ngIf="submitted && loginForm.get('password')?.errors?.['required']">
-                                Contraseña es requerida
+
+                        <div class="form-field">
+                            <label>
+                                <i class="fas fa-key"></i>
+                                Contraseña
+                            </label>
+                            <div class="password-wrapper">
+                                <input [type]="showPassword ? 'text' : 'password'"
+                                       formControlName="password"
+                                       placeholder="••••••••"
+                                       [class.error]="submitted && loginForm.get('password')?.invalid">
+                                <button type="button" 
+                                        class="toggle-password"
+                                        (click)="togglePasswordVisibility()">
+                                    <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                                </button>
                             </div>
+                            <span class="field-message error" *ngIf="submitted && loginForm.get('password')?.errors?.['required']">
+                                Campo requerido
+                            </span>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100" [disabled]="loading">
-                            {{ loading ? 'Cargando...' : 'Ingresar' }}
+
+                        <!--<div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" formControlName="rememberMe">
+                                <span class="checkbox-custom"></span>
+                                Recordar credenciales
+                            </label>
+                            <button type="button" class="link-button" (click)="forgotPassword($event)">
+                                ¿Olvidó su contraseña?
+                            </button>
+                        </div>-->
+
+                        <button type="submit" class="btn-login" [disabled]="loading">
+                            <span *ngIf="!loading">Iniciar Sesión</span>
+                            <span *ngIf="loading">
+                                <i class="fas fa-circle-notch fa-spin"></i> Validando...
+                            </span>
                         </button>
+
+                        <!-- Mensaje de error general -->
+                        <div class="error-message" *ngIf="loginError">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ loginError }}
+                        </div>
                     </form>
                 </div>
             </div>
